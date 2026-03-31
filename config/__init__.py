@@ -1,0 +1,1 @@
+"""SynthDetect configuration package."""

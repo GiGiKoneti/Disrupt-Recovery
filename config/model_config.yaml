@@ -1,0 +1,49 @@
+# ============================================================
+# SynthDetect Model Configuration
+# Hyperparameters for all pipeline components
+# ============================================================
+
+dr_pipeline:
+  chunk_size: 200            # words per chunk
+  chunk_overlap: 50          # sliding window overlap
+  chunk_strategy: "semantic" # fixed | semantic | sliding
+  shuffle_level: "sentence"  # sentence | clause
+  preserve_ratio: 0.2        # fraction of sentences to keep in place
+  preserve_boundaries: true  # keep first/last sentences
+  similarity_alpha: 0.6      # weight for semantic vs structural similarity
+
+faid_pipeline:
+  embedding_dim: 256         # contrastive encoder output dim
+  k_neighbors: 5             # k-NN for attribution
+  feature_groups:
+    lexical_dim: 10
+    syntactic_dim: 150
+    semantic_dim: 20
+    stylometric_dim: 15
+
+contrastive_encoder:
+  hidden_dims: [512, 256]    # MLP hidden layer sizes
+  dropout: 0.3
+  temperature: 0.07          # contrastive loss temperature
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  epochs: 50
+  batch_size: 64             # for training (use Colab/Kaggle)
+  early_stopping_patience: 5
+
+fusion_layer:
+  strategy: "weighted"       # weighted | learned | rule_based
+  weight_dr: 0.6
+  weight_faid: 0.4
+  collaboration_variance_threshold: 0.05
+
+llm:
+  provider: "google"
+  model: "gemini-2.5-flash"
+  temperature: 0.0           # deterministic recovery
+  max_output_tokens: 2000
+  timeout_seconds: 30
+
+spacy:
+  model: "en_core_web_sm"    # lightweight for M1 8GB
+  disable: ["ner", "lemmatizer"]  # speed optimization

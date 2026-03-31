@@ -1,0 +1,29 @@
+# ============================================================
+# Detection Thresholds
+# These values are tuned on validation data.
+# Adjust based on your dataset and desired precision/recall tradeoff.
+# ============================================================
+
+dr_pipeline:
+  # D&R similarity score above this → AI-generated
+  ai_threshold: 0.85
+  # D&R similarity score below this → human-written
+  human_threshold: 0.65
+  # Between human_threshold and ai_threshold → uncertain / collaborative
+  # Variance threshold for collaborative detection
+  variance_collaborative: 0.05
+
+faid_pipeline:
+  # FAID confidence above this → confident attribution
+  confidence_threshold: 0.65
+  # Minimum k-NN distance for valid attribution
+  max_attribution_distance: 0.8
+
+fusion:
+  # Final classification thresholds
+  fully_ai_threshold: 0.80
+  collaborative_lower: 0.40
+  collaborative_upper: 0.80
+  fully_human_threshold: 0.40
+  # Minimum confidence to report a classification
+  min_confidence: 0.50
