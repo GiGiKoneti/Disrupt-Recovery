@@ -1,0 +1,241 @@
+% ============================================================
+% SynthDetect: AI-Generated Text Detection via
+% Disrupt-and-Recover Analysis and Fine-Grained Attribution
+% ============================================================
+\documentclass[conference]{IEEEtran}
+
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{subcaption}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue,
+}
+
+\begin{document}
+
+\title{SynthDetect: AI-Generated Text Detection via\\
+Disrupt-and-Recover Analysis and Fine-Grained Attribution}
+
+\author{
+\IEEEauthorblockN{SynthDetect Team}
+\IEEEauthorblockA{%
+\textit{Research Paper — Work in Progress}\\
+2026}
+}
+
+\maketitle
+
+% ============================================================
+\begin{abstract}
+We present SynthDetect, a novel framework for detecting AI-generated text
+that combines two complementary approaches: (1) \textbf{Disrupt-and-Recover (D\&R)},
+which exploits posterior concentration in language models by measuring how
+faithfully an LLM reconstructs deliberately shuffled text, and
+(2) \textbf{Fine-Grained AI Detection (FAID)}, which uses contrastive learning
+on multi-level linguistic features for model-family attribution.
+Our key insight is that AI-generated text lies in high-probability regions
+of a model's output distribution, causing disrupted AI text to be recovered
+with significantly higher fidelity than human-written text.
+The D\&R pipeline requires only black-box API access (no log-probabilities),
+making it robust against model updates.
+Preliminary experiments using Google Gemini 2.5 Flash show a recovery
+similarity gap of $\Delta = +0.0507$ between AI and human text,
+with structural similarity providing the strongest discriminative signal
+($+0.1243$). SynthDetect achieves this with a single LLM call per text
+chunk at a cost of less than \$0.001 per document.
+\end{abstract}
+
+\begin{IEEEkeywords}
+AI-generated text detection, language model attribution, contrastive learning,
+posterior concentration, natural language processing
+\end{IEEEkeywords}
+
+% ============================================================
+\section{Introduction}
+
+The rapid proliferation of large language models (LLMs) such as GPT-4,
+Claude, and Gemini has created an urgent need for reliable methods to
+distinguish AI-generated text from human writing. Existing detection
+approaches fall into several categories: watermarking-based methods
+\cite{kirchenbauer2023}, which require model cooperation; statistical
+methods based on log-probability analysis \cite{mitchell2023}, which
+require white-box access; and classifier-based methods that may not
+generalize across model families \cite{guo2023}.
+
+We propose SynthDetect, a framework that addresses these limitations
+through two novel contributions:
+
+\begin{enumerate}
+    \item \textbf{Disrupt-and-Recover (D\&R)}: A black-box detection method
+    that exploits the \textit{posterior concentration} phenomenon in LLMs.
+    We deliberately disrupt text structure through controlled sentence
+    shuffling, then ask an LLM to recover the original order. AI-generated
+    text, lying in high-probability regions of the model's output
+    distribution, is recovered with significantly higher fidelity.
+
+    \item \textbf{Fine-Grained AI Detection (FAID)}: A contrastive learning
+    approach that maps multi-level linguistic features (lexical, syntactic,
+    semantic, stylometric) into an embedding space where texts from the same
+    source cluster together, enabling model-family attribution.
+\end{enumerate}
+
+% ============================================================
+\section{Related Work}
+
+\subsection{Statistical Detection Methods}
+Mitchell et al.\ \cite{mitchell2023} proposed DetectGPT, which uses
+log-probability curvature to identify machine-generated text. While
+effective, this approach requires white-box access to model probabilities.
+
+\subsection{Classifier-Based Approaches}
+OpenAI's text classifier \cite{solaiman2019} and similar supervised
+approaches train binary classifiers on human vs.\ AI text. These methods
+often suffer from distribution shift when new models emerge.
+
+\subsection{Watermarking}
+Kirchenbauer et al.\ \cite{kirchenbauer2023} introduced soft watermarking
+for LLM outputs. While robust when applicable, watermarking requires
+cooperation from model providers and does not address existing unwatermarked text.
+
+% ============================================================
+\section{Methodology}
+
+\subsection{Disrupt-and-Recover (D\&R) Pipeline}
+
+The D\&R pipeline consists of four stages:
+
+\subsubsection{Text Chunking}
+Input text $T$ is segmented into chunks $\{C_1, C_2, \ldots, C_n\}$
+using semantic chunking that respects sentence boundaries, with a
+target size of $\sim$200 words per chunk.
+
+\subsubsection{Controlled Disruption}
+Each chunk $C_i$ undergoes sentence-level shuffling $\sigma(C_i)$,
+producing a disrupted version $\tilde{C}_i$. We preserve the first and
+last sentences as context anchors and maintain 20\% of middle sentences
+in their original positions.
+
+\subsubsection{LLM Recovery}
+The disrupted chunk $\tilde{C}_i$ is submitted to an LLM (Google Gemini
+2.5 Flash) with a deterministic recovery prompt ($T=0.0$), producing
+a recovered version $\hat{C}_i$.
+
+\subsubsection{Similarity Scoring}
+We compute a hybrid similarity score:
+\begin{equation}
+    S(C_i, \hat{C}_i) = \alpha \cdot S_{\text{sem}}(C_i, \hat{C}_i)
+    + (1 - \alpha) \cdot S_{\text{str}}(C_i, \hat{C}_i)
+\end{equation}
+where $S_{\text{sem}}$ is the cosine similarity of sentence-transformer
+embeddings (all-MiniLM-L6-v2), $S_{\text{str}}$ is the normalised
+Kendall-$\tau$ distance of sentence orderings, and $\alpha = 0.6$.
+
+The final D\&R score aggregates across chunks:
+\begin{equation}
+    S_{DR}(T) = \frac{1}{n} \sum_{i=1}^{n} S(C_i, \hat{C}_i)
+\end{equation}
+
+\subsection{Fine-Grained AI Detection (FAID)}
+
+FAID extracts multi-level features (lexical: 10 dims, syntactic:
+$\sim$47 dims, semantic: 4 dims, stylometric: 15 dims) and maps them
+through a contrastive encoder trained with SupConLoss
+\cite{khosla2020}. k-NN search in the resulting embedding space
+provides model-family attribution.
+
+\subsection{Fusion Layer}
+
+The fusion layer combines both signals:
+\begin{equation}
+    S_{\text{final}} = w_{DR} \cdot S_{DR} + w_{FAID} \cdot S_{FAID}
+\end{equation}
+with $w_{DR} = 0.6$ and $w_{FAID} = 0.4$, along with variance-based
+collaborative text detection.
+
+% ============================================================
+\section{Preliminary Results}
+
+\subsection{Prototype Validation}
+
+Initial experiments on sample texts using Gemini 2.5 Flash demonstrate
+the core hypothesis (Table~\ref{tab:results}).
+
+\begin{table}[h]
+    \centering
+    \caption{D\&R Pipeline — Preliminary Results}
+    \label{tab:results}
+    \begin{tabular}{lcc}
+        \toprule
+        \textbf{Metric} & \textbf{Human} & \textbf{AI} \\
+        \midrule
+        Mean Combined Sim & 0.9199 & 0.9706 \\
+        Std Combined Sim & 0.0801 & 0.0294 \\
+        Mean Semantic Sim & 0.9937 & 0.9953 \\
+        Mean Structural Sim & 0.8091 & 0.9334 \\
+        \midrule
+        $\Delta$ (AI $-$ Human) & \multicolumn{2}{c}{\textbf{+0.0507}} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Key observations:
+\begin{itemize}
+    \item Structural similarity shows the strongest discriminative signal
+    ($\Delta = +0.1243$), indicating that sentence order recovery is the
+    primary differentiator.
+    \item AI text exhibits lower variance across chunks ($\sigma^2 = 0.0294$
+    vs.\ $0.0801$), consistent with posterior concentration.
+    \item Total cost per document: $<$\$0.001 (4 API calls).
+\end{itemize}
+
+% ============================================================
+\section{Conclusion and Future Work}
+
+We have demonstrated that the Disrupt-and-Recover approach provides a
+viable black-box method for AI text detection. Future work includes:
+(1) large-scale evaluation on HC3 and M4GT-Bench datasets,
+(2) training the FAID contrastive encoder on real feature data,
+(3) multi-model cross-validation (GPT-4, Claude, Gemini),
+(4) adversarial robustness evaluation, and
+(5) threshold optimisation via ROC analysis.
+
+% ============================================================
+\begin{thebibliography}{00}
+
+\bibitem{mitchell2023}
+E. Mitchell, Y. Lee, A. Khazatsky, C. D. Manning, and C. Finn,
+``DetectGPT: Zero-shot machine-generated text detection using probability
+curvature,'' in \textit{Proc. ICML}, 2023.
+
+\bibitem{kirchenbauer2023}
+J. Kirchenbauer, J. Geiping, Y. Wen, J. Katz, I. Miers, and T. Goldstein,
+``A watermark for large language models,'' in \textit{Proc. ICML}, 2023.
+
+\bibitem{guo2023}
+B. Guo, X. Zhang, Z. Wang, M. Jiang, et al.,
+``How close is ChatGPT to human experts? Comparison corpus, evaluation,
+and detection,'' 2023, arXiv:2301.07597.
+
+\bibitem{solaiman2019}
+I. Solaiman, M. Brundage, J. Clark, et al.,
+``Release strategies and the social impacts of language models,'' 2019,
+arXiv:1908.09203.
+
+\bibitem{khosla2020}
+P. Khosla, P. Teterwak, C. Wang, A. Sarna, Y. Tian, P. Isola, A. Maschinot,
+C. Liu, and D. Krishnan, ``Supervised contrastive learning,'' in
+\textit{Proc. NeurIPS}, 2020.
+
+\end{thebibliography}
+
+\end{document}

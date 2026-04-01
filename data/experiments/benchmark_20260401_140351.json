@@ -1,0 +1,101 @@
+{
+  "timestamp": "2026-04-01T14:03:51.924597",
+  "config": {
+    "model": "gemini-2.5-flash",
+    "threshold": 0.85,
+    "n_human": 5,
+    "n_ai": 5
+  },
+  "metrics": {
+    "accuracy": 0.5,
+    "precision": 0.5,
+    "recall": 1.0,
+    "f1": 0.6666666666666666,
+    "auroc": 0.54
+  },
+  "score_stats": {
+    "human_mean": 0.9688,
+    "human_std": 0.02,
+    "ai_mean": 0.972,
+    "ai_std": 0.0343,
+    "delta": 0.0032
+  },
+  "per_sample": [
+    {
+      "index": 0,
+      "label": "human",
+      "score": 0.9818,
+      "words": 112,
+      "time_s": 20.8
+    },
+    {
+      "index": 1,
+      "label": "human",
+      "score": 1.0,
+      "words": 99,
+      "time_s": 5.4
+    },
+    {
+      "index": 2,
+      "label": "human",
+      "score": 0.945,
+      "words": 102,
+      "time_s": 6.5
+    },
+    {
+      "index": 3,
+      "label": "human",
+      "score": 0.9519,
+      "words": 105,
+      "time_s": 9.6
+    },
+    {
+      "index": 4,
+      "label": "human",
+      "score": 0.9653,
+      "words": 100,
+      "time_s": 6.3
+    },
+    {
+      "index": 0,
+      "label": "ai",
+      "score": 1.0,
+      "words": 85,
+      "time_s": 4.3
+    },
+    {
+      "index": 1,
+      "label": "ai",
+      "score": 0.931,
+      "words": 85,
+      "time_s": 9.1
+    },
+    {
+      "index": 2,
+      "label": "ai",
+      "score": 1.0,
+      "words": 82,
+      "time_s": 8.1
+    },
+    {
+      "index": 3,
+      "label": "ai",
+      "score": 1.0,
+      "words": 82,
+      "time_s": 5.9
+    },
+    {
+      "index": 4,
+      "label": "ai",
+      "score": 0.9291,
+      "words": 82,
+      "time_s": 6.9
+    }
+  ],
+  "llm_usage": {
+    "total_calls": 10,
+    "total_input_tokens": 1861,
+    "total_output_tokens": 1121,
+    "estimated_cost_usd": 0.000952
+  }
+}
