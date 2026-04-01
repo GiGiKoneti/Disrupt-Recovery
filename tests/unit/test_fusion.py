@@ -39,7 +39,7 @@ class TestFusionLayer:
 
     def test_strong_human_signal(self, fusion):
         dr = self._make_dr_result(score=0.30, variance=0.01, label="human_written")
-        faid = self._make_faid_result(is_ai=False, confidence=0.2, source="human")
+        faid = self._make_faid_result(is_ai=False, confidence=0.9, source="human")
         result = fusion.fuse(dr, faid)
         assert result.classification == Classification.FULLY_HUMAN
 

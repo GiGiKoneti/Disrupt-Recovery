@@ -6,10 +6,11 @@ authors = ["SynthDetect Team"]
 license = "MIT"
 readme = "README.md"
 keywords = ["ai-detection", "nlp", "text-analysis", "machine-learning"]
+packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-torch = {version = "^2.1.0", source = "pytorch-cpu"}
+torch = "^2.1.0"
 transformers = "^4.35.0"
 sentence-transformers = "^2.2.2"
 spacy = "^3.7.0"
@@ -45,10 +46,6 @@ shap = "^0.43.0"
 optuna = "^3.4.0"
 datasets = "^2.15.0"
 
-[[tool.poetry.source]]
-name = "pytorch-cpu"
-url = "https://download.pytorch.org/whl/cpu"
-priority = "explicit"
 
 [tool.black]
 line-length = 100
