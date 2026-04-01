@@ -1,0 +1,68 @@
+{
+  "timestamp": "2026-04-01T13:49:21.426730",
+  "model": "gemini-2.5-flash",
+  "comparison": {
+    "delta": 0.0507,
+    "hypothesis_supported": true,
+    "human_score": 0.9199,
+    "ai_score": 0.9706
+  },
+  "human_result": {
+    "label": "HUMAN-WRITTEN TEXT",
+    "word_count": 219,
+    "num_chunks": 2,
+    "mean_combined": 0.9199,
+    "std_combined": 0.0801,
+    "mean_semantic": 0.9937,
+    "mean_structural": 0.8091,
+    "chunk_results": [
+      {
+        "chunk_index": 0,
+        "chunk_words": 144,
+        "disruption_score": 0.7272727272727273,
+        "semantic_similarity": 0.9874,
+        "structural_similarity": 0.6182,
+        "combined_similarity": 0.8397,
+        "recovery_latency_s": 8.52
+      },
+      {
+        "chunk_index": 1,
+        "chunk_words": 75,
+        "disruption_score": 0.4,
+        "semantic_similarity": 1.0,
+        "structural_similarity": 1.0,
+        "combined_similarity": 1.0,
+        "recovery_latency_s": 7.31
+      }
+    ]
+  },
+  "ai_result": {
+    "label": "AI-GENERATED TEXT",
+    "word_count": 199,
+    "num_chunks": 2,
+    "mean_combined": 0.9706,
+    "std_combined": 0.0294,
+    "mean_semantic": 0.9953,
+    "mean_structural": 0.9334,
+    "chunk_results": [
+      {
+        "chunk_index": 0,
+        "chunk_words": 137,
+        "disruption_score": 0.5,
+        "semantic_similarity": 0.9907,
+        "structural_similarity": 0.8667,
+        "combined_similarity": 0.9411,
+        "recovery_latency_s": 5.92
+      },
+      {
+        "chunk_index": 1,
+        "chunk_words": 62,
+        "disruption_score": 0.0,
+        "semantic_similarity": 1.0,
+        "structural_similarity": 1.0,
+        "combined_similarity": 1.0,
+        "recovery_latency_s": 2.65
+      }
+    ]
+  }
+}
