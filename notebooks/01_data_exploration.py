@@ -125,12 +125,12 @@ for label in ["human", "ai"]:
     for _, row in subset.iterrows():
         text = str(row["text"])[:500]
         features = extractor.extract_features(text)
-        flat = extractor.flatten(features)
+        flat = extractor.extract_flat_vector(str(row["text"])[:500])
         print(f"  [{row.get('source', '?'):>10}] "
               f"words={count_words(text):>4} | "
               f"features={len(flat)} dims | "
-              f"TTR={features['lexical']['type_token_ratio']:.3f} | "
-              f"avg_word={features['lexical']['avg_word_length']:.1f}")
+              f"TTR={features['lexical'][0]:.3f} | "
+              f"avg_word={features['lexical'][1]:.1f}")
 
 # %% — Feature Distribution Comparison
 print("\n" + "=" * 60)
@@ -147,11 +147,19 @@ ai_features = []
 
 for _, row in human_subset.iterrows():
     feat = extractor.extract_features(str(row["text"])[:500])
-    human_features.append(feat["lexical"])
+    human_features.append({
+        "type_token_ratio": feat["lexical"][0],
+        "avg_word_length": feat["lexical"][1],
+        "avg_sentence_length": feat["stylometric"][0]
+    })
 
 for _, row in ai_subset.iterrows():
     feat = extractor.extract_features(str(row["text"])[:500])
-    ai_features.append(feat["lexical"])
+    ai_features.append({
+        "type_token_ratio": feat["lexical"][0],
+        "avg_word_length": feat["lexical"][1],
+        "avg_sentence_length": feat["stylometric"][0]
+    })
 
 # Compare key lexical features
 human_df = pd.DataFrame(human_features)

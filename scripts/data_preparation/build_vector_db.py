@@ -71,7 +71,7 @@ def extract_features_from_csv(
 
         try:
             feat_dict = extractor.extract_features(text)
-            flat = extractor.flatten(feat_dict)
+            flat = extractor.extract_flat_vector(text)
             features_list.append(flat)
 
             metadata_list.append({
