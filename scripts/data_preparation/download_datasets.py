@@ -145,16 +145,20 @@ def download_m4gt(output_dir: str = "data/raw/m4gt", max_samples: int = 2000) ->
 
         # Try multiple known dataset IDs for this task
         dataset_ids = [
+            "anyangsong/SemEval2024-Task8-SubtaskA",
             "SemEval2024-Task8/subtaskA",
             "SemEval2024-MGTD/subtaskA",
-            "yafuly/MAGE",  # Alternative multi-generator dataset
         ]
 
         dataset = None
         for ds_id in dataset_ids:
             try:
                 print(f"   Trying: {ds_id}...")
-                dataset = load_dataset(ds_id, trust_remote_code=True)
+                if ds_id == "anyangsong/SemEval2024-Task8-SubtaskA":
+                    # This specific one needs a file-based load or correctly formatted config
+                    dataset = load_dataset(ds_id, trust_remote_code=True)
+                else:
+                    dataset = load_dataset(ds_id, trust_remote_code=True)
                 print(f"   ✅ Loaded: {ds_id}")
                 break
             except Exception as e:
@@ -163,12 +167,13 @@ def download_m4gt(output_dir: str = "data/raw/m4gt", max_samples: int = 2000) ->
 
         if dataset is None:
             print("❌ M4GT download failed: None of the dataset IDs were accessible.")
-            print("   You may need to accept the dataset license on HuggingFace first.")
             return None
 
         # Process into flat DataFrame
         rows = []
-        for split_name in dataset:
+        # Support both 'train' split and other potential splits
+        splits = list(dataset.keys())
+        for split_name in splits:
             split = dataset[split_name]
             for item in split:
                 text = item.get("text", "") or item.get("content", "")
@@ -233,8 +238,9 @@ def download_turingbench(output_dir: str = "data/raw/turingbench", max_samples: 
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
 
-        print("📥 Downloading TuringBench dataset...")
-        dataset = load_dataset("turingbench/TuringBench", trust_remote_code=True)
+        print("📥 Downloading OpenTuringBench dataset...")
+        # Using OpenTuringBench in_domain config as it is stable and comprehensive
+        dataset = load_dataset("MLNTeam-Unical/OpenTuringBench", "in_domain", trust_remote_code=True)
 
         rows = []
         for split_name in dataset:
